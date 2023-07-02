@@ -1,0 +1,163 @@
+/* Reset default browser styles */
+html, body {
+    background-color: #07020D;
+    margin: 0;
+    padding: 0;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    color: #FFF;
+}
+
+/* Make Page Link look Fancy */
+nav h3 a {
+  background-color: #007FFF;
+  color: #FFF;
+  padding: 1em 1.5em;
+  left: 2rem;
+  text-decoration: none;
+  text-transform: uppercase;
+  box-shadow: 0 5px 0 #007aaa;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  position: relative;
+}
+
+nav h3 a:hover {
+  background-color: #007eee;
+}
+
+nav h3 a:active {
+  box-shadow: none;
+  top: 5px;
+}
+
+/* Make Dialog Box size of screen */
+dialog, iframe {
+    width: 95vw;
+    height: 95vh;
+    overflow: hidden;
+}
+
+h1 {
+    padding: 0 0 0 2rem;
+    text-align: left;
+    font-size: 3rem;
+    color: #ffffff;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+h2 {
+    margin-top: 30px;
+    font-size: 2rem;
+}
+
+#exitBtn {
+    position: absolute;
+    top: 2px;
+    right:2px;
+    min-width: 10rem;
+    width: 6vw;
+}
+
+#viewInSeparate {
+    font-size: 2rem;
+    border-top: 1px solid #590925;
+}
+
+/* Management container */
+#management {
+    max-width: 100vw;
+    margin: 0 auto;
+    background-color: #82D173;
+    padding: 1rem 1rem;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+/* ZingGrid */
+.zg-body {
+  font-family: 'Chakra Petch', sans-serif;
+  background: #141E30;
+  /* fallback for old browsers */
+  background: -webkit-linear-gradient(to right, #243B55, #141E30);  /* Chrome 10-25, Safari 5.1-6 */
+  background: linear-gradient(to right, #243B55, #141E30); /* W3C, IE 10+/ Edge, Firefox 16+, Chrome 26+, Opera 12+, Safari 7+ */
+  color: white;
+}
+
+zing-grid {
+  max-width: 95vw;
+  margin: 30px auto 0 auto;
+  font-size: 14px;
+  font-family: 'Chakra Petch', sans-serif;
+  background: #141618;
+  color: #c7e5fa;
+  border-color: #003450;
+  opacity: 1;
+  --theme-color-primary: #005481;
+  --zg-head-cell-background_sorted: #003450;
+  --zg-cell-background_sorted: #1b252d;
+  --zg-select-arrow-color: #ffffff;
+  --zg-head-cell-icon-color_sorted: #ffffff;
+  --zg-option-list-color: #021b2a;
+  --zg-select-background: #021b2a;
+  --zg-select-text-background: #021b2a;
+  --zg-select-color: white;
+}
+zing-grid.loading { opacity:0; transition:opacity .3s ease-out; }
+zing-grid.loading * { opacity:0; }
+
+zg-caption {
+  background: #000f17;
+  font-size: 25px;
+}
+
+zg-caption i {
+  max-width: 15px;
+  margin-right: 15px;
+}
+
+zg-head {
+  border-color: #003450;
+}
+
+zg-head-cell {
+  background: #021b2a;
+  color: #005481;
+  font-weight: bold;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: .5px;
+}
+
+zg-head-cell_sorted zg-icon {
+  max-width: 15px;
+  color: #ffffff;
+}
+
+zg-column[index="url"] {
+  background: #000f17;
+  width: 25%;
+}
+
+zg-row {
+  border-color: #003450;
+}
+
+.details {
+  font-size: 11px;
+  color: #cccccc;
+}
+
+zg-pager,
+zg-watermark {
+  background: #021b2a;
+  color: white;
+  border-color: #003450;
+}
+
+.zg-body .up {
+  color: #63E385;
+  font-weight: bold;
+}
+
+.zg-body .down {
+  color: #FF5864;
+  font-weight: bold;
+}

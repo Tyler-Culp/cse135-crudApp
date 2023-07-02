@@ -1,0 +1,601 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="dashboard.css">
+    <script async src="zingchart/zingchart.min.js"></script>
+    <script async src="zingchart/zinggrid.min.js"></script>
+    <link rel="icon" href="favicon.ico" type="image/x-icon"> 
+    <link rel="shortcut icon" href="favicon.ico" type="image/x-icon">
+    <title>User Dashboard</title>
+</head>
+<body>
+    <h1>User Dashboard</h1>
+    <a href="./logout.html">
+        <img id="exitBtn" alt="exit" src="exit.png">
+    </a>
+    <div id="dashboard">
+        <div id="myChart"></div>
+        <div id="pieChart"></div>
+        <div id="errorGauge"></div>
+        <a id="viewInSeparate" target="_blank" href="detailed_report.html">View Detailed Report in separate tab?</a>
+        <h2>Breaks Taken from Website:</h2>
+        <zing-grid id="grid" data="">
+            <!-- <zing-data src="https://tylers.site/api/dynamic"></zing-data> -->
+        </zing-grid>
+    </div>
+    <dialog id="detailedDialog">
+        <div id="errorGauge2"></div>
+        <h2>Error Type</h2>
+        <div id="errorType"></div>
+        <!-- <h2>Error Time of day</h2> -->
+        <h2>Error Averages by Day</h2>
+        <div id="errorAvgs"></div>
+        <h2>Error Grid</h2>
+        <a id="viewInSeparate" target="_blank" href="detailed_report.html">Error Grid Available in New Tab</a>
+    </dialog>
+    <script>
+        async function getData() {
+            const response = await fetch(`https://tylers.site/api/performance`);
+            const staticResponse = await fetch (`https://tylers.site/api/static`);
+            const dynamicResponse = await fetch (`https://tylers.site/api/dynamic`);
+            let dynamicData = await dynamicResponse.json();
+	        let charData = await response.json();
+            let totalTime       = [0, 0, 0, 0, 0, 0, 0];
+            let totalAccesses    = [0, 0, 0, 0, 0, 0, 0];
+            let avgTime         = [0 , 0, 0, 0, 0, 0, 0];
+            let daysOfWeek = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+            let staticData = await staticResponse.json();
+            totalTimes = [];
+            connectionType = [0,0,0,0,0,0]
+            for (i = 0 ; i < charData.length ; i++) {
+                let dateString = charData[i].date;
+                let date = new Date(dateString);
+                totalTime[date.getDay()] += charData[i].total;
+                totalAccesses[date.getDay()]++;
+            }
+
+            for (let i = 0 ; i < 7 ; i++) {
+                if (totalAccesses[i] === 0) {
+                    avgTime[i] = 0;
+                }
+                avgTime[i] = totalTime[i] / totalAccesses[i];
+            }
+            // console.log(avgTime);
+
+            for (i = 0 ; i < charData.length ; i++){
+                totalTimes[i] = charData[i].total;
+            }
+
+            for (i = 0 ; i < staticData.length ; i++){
+                switch(staticData[i].connection.type) {
+                    case '1g':
+                        connectionType[0]++;
+                        break;
+                    case '2g':
+                        connectionType[1]++;
+                        break;
+                    case '3g':
+                        connectionType[2]++;
+                        break;
+                    case '4g':
+                        connectionType[3]++;
+                        break;
+                    case '5g':
+                        connectionType[4]++;
+                        break;
+                    default:
+                        connectionType[5]++;
+                }
+            }
+
+            let myConfig = {
+                type: 'bar',
+                title: {
+                    text: 'Average Performance by Day of Week',
+                    fontSize: 24,
+                },
+                legend: {
+                    draggable: true,
+                },
+                scaleX: {
+                    // Set scale label
+                    label: { text: 'Day of Week' },
+                    // Convert text on scale indices
+                    labels: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat' ]
+                },
+                scaleY: {
+                    // Scale label with unicode character
+                    label: { text: 'Load Time (ms)' }
+                },
+                plot: {
+                    // Animation docs here:
+                    // https://www.zingchart.com/docs/tutorials/styling/animation#effect
+                    animation: {
+                    effect: 'ANIMATION_EXPAND_BOTTOM',
+                    method: 'ANIMATION_STRONG_EASE_OUT',
+                    sequence: 'ANIMATION_BY_NODE',
+                    speed: 275,
+                    }
+                },
+                series: [
+                    {
+                    // plot 1 values, linear data
+                    values: avgTime,
+                    text: 'Total Performance',
+                    }
+                ]
+            };
+            //console.log(totalTimes);
+            zingchart.render({
+                id: 'myChart',
+                data: myConfig,
+            });
+
+            let pieConfig = {
+                type: 'bar',
+                title: {
+                    text: 'User Network Connections',
+                    fontSize: 24,
+                },
+                legend: {
+                    draggable: true,
+                },
+                scaleX: {
+                    // Set scale label
+                    label: { text: 'Generation' },
+                    // Convert text on scale indices
+                    labels: ['1g', '2g', '3g', '4g', '5g', 'other']
+                },
+                scaleY: {
+                    // Scale label with unicode character
+                    label: { text: 'Total Count' }
+                },
+                plot: {
+                    // Animation docs here:
+                    // https://www.zingchart.com/docs/tutorials/styling/animation#effect
+                    animation: {
+                    effect: 'ANIMATION_EXPAND_BOTTOM',
+                    method: 'ANIMATION_STRONG_EASE_OUT',
+                    sequence: 'ANIMATION_BY_NODE',
+                    speed: 275,
+                    }
+                },
+                series: [
+                    { 
+                        // plot 1 values, linear data
+                        values: connectionType,
+                        legendItem: {
+                            visible: false
+                        }
+                    }
+                ],
+            }
+
+            zingchart.render({
+                 id: 'pieChart',
+                 data: pieConfig,
+                height: 400,
+                width: "100%"
+            });
+            
+            // Error Gauge: uses Dynamic data
+            let now = new Date();
+            let numErrorsThisWeek = 0;
+            const lastWeek = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+            for (i = 0; i < dynamicData.length; i++) {
+                if (dynamicData[i].error != null) {
+                    if (dynamicData[i].inactivity){
+                        let errorDate = new Date(dynamicData[i].inactivity.breakEnded);
+                        if (errorDate.getTime() >= lastWeek.getTime()) {
+                            numErrorsThisWeek++;
+                        }
+                    }
+                }
+            }
+            if (numErrorsThisWeek > 30) {
+                numErrorsThisWeek = 30; // Max Scale Limit is 30
+            }
+            let errorGaugeConfig = {
+                "type": "gauge",
+                "title": {
+                    "text": "Number of Errors This Week"
+                },
+                "scale-r": {
+                    "aperture": "200",
+                    "values": "0:30:5", // min:max:step
+                    "center": {
+                    "size": 5,
+                    "background-color": "#66CCFF #FFCCFF",
+                    "border-color": "none"
+                    },
+                    "ring": { //Ring with Rules
+                    "size": "10",
+                    "text": "'%v'", //default
+                    "fontSize": "35",
+                    "rules": [{
+                        "rule": "%v >= 0 && %v <= 5",
+                        "background-color": "blue",
+                        "text": "%v<br>Great"
+                        },
+                        {
+                        "rule": "%v >= 5 && %v <= 10",
+                        "background-color": "green",
+                        "text": "%v<br>Kalm"
+                        },
+                        {
+                        "rule": "%v >= 10 && %v <= 15",
+                        "background-color": "yellow",
+                        "test": "%v<br>Mild"
+                        },
+                        {
+                        "rule": "%v >= 15 && %v <= 20",
+                        "background-color": "orange",
+                        "test": "%v<br>Warning"
+                        },
+                        {
+                        "rule": "%v >= 20 && %v <=25",
+                        "background-color": "red",
+                        "text": "%v<br>Panik"
+                        },
+                        {
+                        "rule": "%v >= 25 && %v <=30",
+                        "background-color": "darkred",
+                        "text": "%v<br>💀"
+                        }
+                    ]}
+                },
+                "plot": {
+                    "csize": "5%",
+                    "size": "100%",
+                    "text": "%v",
+                    "background-color": "#000000",
+                    "valueBox": {
+                        "placement": 'center',
+                        "text": '%v', //default
+                        "fontSize": 35,
+                        "rules": [{
+                            "rule": "%v >= 0 && %v < 5",
+                            "text": "<br>Great"
+                            },
+                            {
+                            "rule": "%v >= 5 && %v < 15",
+                            "text": "<br>Kalm"
+                            },
+                            {
+                            "rule": "%v >= 15 && %v < 25",
+                            "text": "<br>Panik"
+                            },
+                            {
+                            "rule": "%v >= 25 && %v <= 30",
+                            "text": "<br>💀"
+                            }
+                        ]}
+                    },
+                "series": [{
+                    "values": [numErrorsThisWeek] // Scale Points to this Value
+                }]
+            };
+            zingchart.render({
+                 id: 'errorGauge',
+                 data: errorGaugeConfig,
+                height: 400,
+                width: "100%"
+            });
+            zingchart.bind('errorGauge', 'click', function() {
+                let detailedDialog = document.getElementById("detailedDialog");
+                detailedDialog.showModal();
+            });
+        }
+        jsonTimes = getData();
+	    async function getChartData() {
+            let request = await fetch("https://tylers.site/api/dynamic");
+            let gridData = await request.json();
+            let obj = []
+            let count = 0
+            for (let i = 0; i < gridData.length ; i++) {
+                let dateData = await gridData[i];
+                if (dateData.inactivity) {
+                    // console.log(dateData.inactivity);
+                    let date = new Date(gridData[i].inactivity.breakEnded);
+                    obj[count] = {  id : gridData[i]._id,
+                                    Day : date.toDateString(),
+                                    Total_Break_in_milliseconds : gridData[i].inactivity.totalBreak
+                    }
+                    count++;
+                }
+            }
+            document.getElementById("grid").data = obj;
+	    }
+	    setTimeout(getChartData(), 0);
+
+
+        //////////////////////////// Detailed Report Dialog ///////////////////////////////////
+        async function makeErrorAvgs() {
+            let request = await fetch("https://tylers.site/api/dynamic");
+            let dynamicData = await request.json();
+            let staticRequest = await fetch('https://tylers.site/api/static');
+            let staticData = await staticRequest.json();
+            let errorTotals = [0,0,0,0,0,0,0];
+            let accessTotals = [0,0,0,0,0,0,0];
+            let errorAvgs = [0,0,0,0,0,0,0];
+
+            for (let i = 0 ; i < staticData.length ; i++){
+                let staticEntry = staticData[i];
+                if (staticEntry.createdAt) {
+                    // console.log(staticEntry);
+                    let day = new Date(staticEntry.createdAt).getDay();
+                    accessTotals[day]++;
+                }
+            }
+
+            for (let i = 0 ; i < dynamicData.length ; i++) {
+                let dynamicEntry = dynamicData[i];
+                let errorData = dynamicEntry.error;
+                if (errorData) {
+                    if (dynamicEntry.createdAt) {
+                        let day = new Date(dynamicEntry.createdAt).getDay();
+                        errorTotals[day]++;
+                    }
+                }
+            }
+
+            console.log(accessTotals);
+            console.log(errorTotals);
+
+            for (let i = 0 ; i < errorAvgs.length ; i++) {
+                if (accessTotals[i] > 0) {
+                    errorAvgs[i] = errorTotals[i] / accessTotals[i]
+                }
+            }
+
+            let myConfig = {
+                type: 'bar',
+                title: {
+                    text: 'Error Averages by Day of the Week',
+                    fontSize: 24,
+                },
+                legend: {
+                    draggable: true,
+                },
+                scaleX: {
+                    // Set scale label
+                    label: { text: 'Day of week' },
+                    // Convert text on scale indices
+                    labels: ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"]
+                },
+                scaleY: {
+                    // Scale label with unicode character
+                    label: { text: 'Avg number of errors per user visit' }
+                },
+                plot: {
+                    // Animation docs here:
+                    // https://www.zingchart.com/docs/tutorials/styling/animation#effect
+                    animation: {
+                    effect: 'ANIMATION_EXPAND_BOTTOM',
+                    method: 'ANIMATION_STRONG_EASE_OUT',
+                    sequence: 'ANIMATION_BY_NODE',
+                    speed: 275,
+                    }
+                },
+                series: [
+                    {
+                        // plot 1 values, linear data
+                        values: errorAvgs,
+                        legendItem: {
+                            visible: false
+                        }
+                    }
+                ]
+            };
+            //console.log(totalTimes);
+            zingchart.render({
+                id: 'errorAvgs',
+                data: myConfig,
+            });
+        }
+
+        makeErrorAvgs();
+
+        async function makeChartData() {
+            let request = await fetch("https://tylers.site/api/dynamic");
+            let gridData = await request.json();
+            let obj = [];
+            let count = 0;
+            let errorTypes = {};
+            let dailyAccesses = [0 , 0, 0, 0, 0, 0, 0]
+            let errorAvgs = [0, 0, 0, 0, 0, 0, 0];
+            let daysOfWeek = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+            for (let i = 0; i < gridData.length ; i++) {
+                let dateData = await gridData[i];
+                let errorData = dateData.error;
+                if (errorData) {
+                    if (dateData.createdAt) {
+                        day = new Date(dateData.createdAt).getDay();
+                        // console.log(day);
+                        errorAvgs[day]++;
+                    }
+                    let errorType = errorData.message.split(":")[0];
+                    if (!errorTypes[errorType]) {
+                        // console.log(errorType);
+                        errorTypes[errorType] = 1;
+                    } else{
+                        errorTypes[errorType]++;
+                    }
+                    
+                }
+            }
+
+            let mapCount = 0;
+            let errorStrings = [];
+            let errorValues  = [];
+            for (const [key, value] of Object.entries(errorTypes)) {
+                errorStrings[mapCount] = key;
+                errorValues[mapCount] = value;
+                mapCount++;
+            }
+
+            let myConfig = {
+                type: 'bar',
+                title: {
+                    text: 'Error Amounts by Type',
+                    fontSize: 24,
+                },
+                legend: {
+                    draggable: true,
+                },
+                scaleX: {
+                    // Set scale label
+                    label: { text: 'Error Types' },
+                    // Convert text on scale indices
+                    labels: errorStrings
+                },
+                scaleY: {
+                    // Scale label with unicode character
+                    label: { text: 'Amount of Errors' }
+                },
+                plot: {
+                    // Animation docs here:
+                    // https://www.zingchart.com/docs/tutorials/styling/animation#effect
+                    animation: {
+                    effect: 'ANIMATION_EXPAND_BOTTOM',
+                    method: 'ANIMATION_STRONG_EASE_OUT',
+                    sequence: 'ANIMATION_BY_NODE',
+                    speed: 275,
+                    }
+                },
+                series: [
+                    {
+                        // plot 1 values, linear data
+                        values: errorValues,
+                        legendItem: {
+                            visible: false
+                        }
+                    }
+                ]
+            };
+            //console.log(totalTimes);
+            zingchart.render({
+                id: 'errorType',
+                data: myConfig,
+            });
+
+            const response = await fetch(`https://tylers.site/api/performance`);
+            const staticResponse = await fetch (`https://tylers.site/api/static`);
+            const dynamicResponse = await fetch (`https://tylers.site/api/dynamic`);
+            let charData = await response.json();
+            let staticData = await staticResponse.json();
+            let dynamicData = await dynamicResponse.json();
+
+            // Error Gauge: uses Dynamic data
+            let now = new Date();
+            let numErrorsThisWeek = 0;
+            const lastWeek = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+            for (i = 0; i < dynamicData.length; i++) {
+                if (dynamicData[i].error != null) {
+                    if (dynamicData[i].inactivity){
+                        let errorDate = new Date(dynamicData[i].inactivity.breakEnded);
+                        if (errorDate.getTime() >= lastWeek.getTime()) {
+                            numErrorsThisWeek++;
+                        }
+                    }
+                }
+            }
+            if (numErrorsThisWeek > 30) {
+                numErrorsThisWeek = 30; // Max Scale Limit is 30
+            }
+
+            // Error Gauge 2
+            let errorGaugeConfig = {
+                "type": "gauge",
+                "title": {
+                    "text": "Number of Errors This Week"
+                },
+                "scale-r": {
+                    "aperture": "200",
+                    "values": "0:30:5", // min:max:step
+                    "center": {
+                    "size": 5,
+                    "background-color": "#66CCFF #FFCCFF",
+                    "border-color": "none"
+                    },
+                    "ring": { //Ring with Rules
+                    "size": "10",
+                    "text": "'%v'", //default
+                    "fontSize": "35",
+                    "rules": [{
+                        "rule": "%v >= 0 && %v <= 5",
+                        "background-color": "blue",
+                        "text": "%v<br>Great"
+                        },
+                        {
+                        "rule": "%v >= 5 && %v <= 10",
+                        "background-color": "green",
+                        "text": "%v<br>Kalm"
+                        },
+                        {
+                        "rule": "%v >= 10 && %v <= 15",
+                        "background-color": "yellow",
+                        "test": "%v<br>Mild"
+                        },
+                        {
+                        "rule": "%v >= 15 && %v <= 20",
+                        "background-color": "orange",
+                        "test": "%v<br>Warning"
+                        },
+                        {
+                        "rule": "%v >= 20 && %v <=25",
+                        "background-color": "red",
+                        "text": "%v<br>Panik"
+                        },
+                        {
+                        "rule": "%v >= 25 && %v <=30",
+                        "background-color": "darkred",
+                        "text": "%v<br>💀"
+                        }
+                    ]}
+                },
+                "plot": {
+                    "csize": "5%",
+                    "size": "100%",
+                    "text": "%v",
+                    "background-color": "#000000",
+                    "valueBox": {
+                        "placement": 'center',
+                        "text": '%v', //default
+                        "fontSize": 35,
+                        "rules": [{
+                            "rule": "%v >= 0 && %v < 5",
+                            "text": "<br>Great"
+                            },
+                            {
+                            "rule": "%v >= 5 && %v < 15",
+                            "text": "<br>Kalm"
+                            },
+                            {
+                            "rule": "%v >= 15 && %v < 25",
+                            "text": "<br>Panik"
+                            },
+                            {
+                            "rule": "%v >= 25 && %v <= 30",
+                            "text": "<br>💀"
+                            }
+                        ]}
+                    },
+                "series": [{
+                    "values": [numErrorsThisWeek] // Scale Points to this Value
+                }]
+            };
+            zingchart.render({
+                 id: 'errorGauge2',
+                 data: errorGaugeConfig,
+                height: 400,
+                width: "100%"
+            });
+	    }
+        makeChartData();
+    </script>
+</body>
+</html>

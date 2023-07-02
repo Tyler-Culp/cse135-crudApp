@@ -1,0 +1,76 @@
+/* Reset default browser styles */
+html, body {
+    background-color: #007FFF;
+    margin: 0;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    padding: 0;
+    color: #590925;
+}
+
+/* Make Page Link look Fancy */
+nav h3 a {
+  background-color: #07020D;
+  color: #FFF;
+  padding: 1em 1.5em;
+  left: 2rem;
+  text-decoration: none;
+  text-transform: uppercase;
+  box-shadow: 0 5px 0 #007111;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  position: relative;
+}
+
+nav h3 a:hover {
+  background-color: #071200;
+}
+
+nav h3 a:active {
+  box-shadow: none;
+  top: 5px;
+}
+
+h1 {
+    padding: 0 0 0 2rem;
+    text-align: left;
+    font-size: 4rem;
+    color: #ffffff;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+h2 {
+    margin-top: 30px;
+    font-size: 2rem;
+}
+
+#exitBtn {
+    position: absolute;
+    top: 2px;
+    right:2px;
+    min-width: 10rem;
+    width: 6vw;
+}
+
+#viewInSeparate {
+    font-size: 2rem;
+    border-top: 1px solid #590925;
+}
+
+/* Dashboard container */
+#dashboard {
+    max-width: 100vw;
+    margin: 0 auto;
+    background-color: #D4DCFF;
+    padding: 20px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+/* Charts */
+#myChart, #pieChart, #errorGauge {
+    margin-top: 30px;
+}
+
+/* ZingGrid */
+zing-grid {
+    margin-top: 30px;
+    width: 95vw;
+}
